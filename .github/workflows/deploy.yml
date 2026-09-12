@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  REGION: asia-south1
+  REGION: asia-southeast1
   SERVICE: cliffer-web
   REPOSITORY: cliffer-images
   IMAGE: cliffer-web
