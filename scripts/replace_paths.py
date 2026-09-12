@@ -17,7 +17,7 @@ replacements = {
     "assets/images/cliffer/villawindows/4.webp": "assets/images/cliffer/new/split_windows.jpg"
 }
 
-html_files = glob.glob("*.html")
+html_files = glob.glob("*.html") + glob.glob("doors/*.html") + glob.glob("windows/*.html")
 
 for html_file in html_files:
     with open(html_file, 'r', encoding='utf-8') as f:

@@ -16,6 +16,7 @@
     setupImageLoading();
     setupScrollEdges();
     setupActiveNavIndicator();
+    setupLightbox();
 
     if (isFinePointer && !reduceMotion) {
       setupCursorDot();
@@ -453,4 +454,123 @@
     }
     window.addEventListener('scroll', onScroll, { passive: true });
   }
+
+  /* -------------------------------------------------
+     Interactive Lightbox Modal for Product Galleries
+  ------------------------------------------------- */
+  function setupLightbox() {
+    var items = document.querySelectorAll('[data-gallery-item]');
+    if (!items.length) return;
+
+    var lightbox = document.createElement('div');
+    lightbox.className = 'lightbox';
+    lightbox.setAttribute('role', 'dialog');
+    lightbox.setAttribute('aria-modal', 'true');
+    lightbox.setAttribute('aria-label', 'Image Gallery Lightbox');
+    lightbox.innerHTML =
+      '<button type="button" class="lightbox-btn lightbox-close" aria-label="Close image modal">' +
+        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' +
+      '</button>' +
+      '<button type="button" class="lightbox-btn lightbox-prev" aria-label="Previous image">' +
+        '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>' +
+      '</button>' +
+      '<button type="button" class="lightbox-btn lightbox-next" aria-label="Next image">' +
+        '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>' +
+      '</button>' +
+      '<div class="lightbox-dialog">' +
+        '<div class="lightbox-img-wrap">' +
+          '<img class="lightbox-img" src="" alt="">' +
+        '</div>' +
+        '<div class="lightbox-caption">' +
+          '<span class="lightbox-title"></span>' +
+          '<span class="lightbox-counter"></span>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(lightbox);
+
+    var img = lightbox.querySelector('.lightbox-img');
+    var titleEl = lightbox.querySelector('.lightbox-title');
+    var counterEl = lightbox.querySelector('.lightbox-counter');
+    var btnClose = lightbox.querySelector('.lightbox-close');
+    var btnPrev = lightbox.querySelector('.lightbox-prev');
+    var btnNext = lightbox.querySelector('.lightbox-next');
+
+    var currentIndex = 0;
+    var imageList = [];
+    var lastFocusedElement = null;
+
+    items.forEach(function (card, index) {
+      var itemImg = card.querySelector('img');
+      if (!itemImg) return;
+      var src = card.getAttribute('data-full') || itemImg.getAttribute('src');
+      var alt = itemImg.getAttribute('alt') || 'Product installation photograph';
+      imageList.push({ src: src, alt: alt });
+
+      card.addEventListener('click', function () {
+        open(index);
+      });
+    });
+
+    function open(index) {
+      lastFocusedElement = document.activeElement;
+      currentIndex = (index + imageList.length) % imageList.length;
+      update();
+      lightbox.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+      btnClose.focus();
+    }
+
+    function close() {
+      lightbox.classList.remove('is-open');
+      document.body.style.overflow = '';
+      if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+        lastFocusedElement.focus();
+      }
+    }
+
+    function prev() {
+      currentIndex = (currentIndex - 1 + imageList.length) % imageList.length;
+      update();
+    }
+
+    function next() {
+      currentIndex = (currentIndex + 1) % imageList.length;
+      update();
+    }
+
+    function update() {
+      var current = imageList[currentIndex];
+      if (!current) return;
+      img.src = current.src;
+      img.alt = current.alt;
+      titleEl.textContent = current.alt;
+      counterEl.textContent = '(' + (currentIndex + 1) + ' / ' + imageList.length + ')';
+    }
+
+    btnClose.addEventListener('click', close);
+    btnPrev.addEventListener('click', prev);
+    btnNext.addEventListener('click', next);
+
+    lightbox.addEventListener('click', function (e) {
+      if (e.target === lightbox || e.target.classList.contains('lightbox-dialog')) {
+        close();
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (!lightbox.classList.contains('is-open')) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        close();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prev();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        next();
+      }
+    });
+  }
 })();
+
