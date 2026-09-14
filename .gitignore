@@ -8,3 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Root temporary image files
+/hero_image.jpg
+/hero_option_*.jpg
