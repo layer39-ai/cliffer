@@ -13,6 +13,7 @@
     setupAccordions();
     setupHeroLine();
     setupScrollReveal();
+    setupMobileFeatureFocus();
     setupImageLoading();
     setupScrollEdges();
     setupActiveNavIndicator();
@@ -153,6 +154,39 @@
     document.querySelectorAll('.reveal').forEach(function (el) {
       observer.observe(el);
     });
+  }
+
+  /* -------------------------------------------------
+     Mobile scroll-driven focus for feature cards
+  ------------------------------------------------- */
+  function setupMobileFeatureFocus() {
+    var cards = document.querySelectorAll('.feature-grid .feature');
+    if (!cards.length) return;
+
+    if (!('IntersectionObserver' in window)) {
+      cards.forEach(function (card) { card.classList.add('is-active'); });
+      return;
+    }
+
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting && window.innerWidth <= 900) {
+          cards.forEach(function (c) { c.classList.remove('is-active'); });
+          entry.target.classList.add('is-active');
+        }
+      });
+    }, {
+      threshold: 0.25,
+      rootMargin: '-20% 0px -20% 0px'
+    });
+
+    cards.forEach(function (card) {
+      observer.observe(card);
+    });
+
+    if (cards[0] && window.innerWidth <= 900) {
+      cards[0].classList.add('is-active');
+    }
   }
 
   /* -------------------------------------------------
@@ -300,7 +334,7 @@
      Cursor-tracked glow + tilt on product/feature cards
   ------------------------------------------------- */
   function setupTiltCards() {
-    var cards = document.querySelectorAll('.product-card, .feature');
+    var cards = document.querySelectorAll('.product-card');
     cards.forEach(function (card) {
       card.classList.add('tilt-card');
       var rect = null;
